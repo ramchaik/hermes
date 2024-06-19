@@ -1,0 +1,8 @@
+port: 9003
+services:
+  - name: srv1
+    url: http://srv1:80
+  - name: srv2
+    url: http://srv2:80
+  - name: srv3
+    url: http://srv3:80

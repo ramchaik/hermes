@@ -23,6 +23,6 @@ Uses Round Robin for load distribution.
 
 > Least Connections - Load is distributed to the servers with least active connections
 
-- [ ] Add configuration file support
+- [x] Add configuration file support
 - [ ] Use a heap for sort out alive backends to reduce search surface
 - [ ] Collect statistics

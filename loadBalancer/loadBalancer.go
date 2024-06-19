@@ -2,13 +2,11 @@ package loadbalancer
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 	"time"
 )
 
@@ -90,40 +88,18 @@ func setupService(serviceUrl *url.URL) {
 	log.Printf("Configured service: %s\n", serviceUrl)
 }
 
-func parseAndLoadConfig(serverList string, port *int, setupFn func(surl *url.URL)) {
-	flag.StringVar(&serverList, "services", "", "Load balanced services, use comma separated list")
-	flag.IntVar(&*port, "port", 9000, "Port to serve")
-	flag.Parse()
-
-	if len(serverList) == 0 {
-		log.Fatal("Please provide services to load balance")
-	}
-
-	tokens := strings.Split(serverList, ",")
-	for _, t := range tokens {
-		serviceUrl, err := url.Parse(t)
-		if err != nil {
-			log.Fatal(err)
-		}
-		setupFn(serviceUrl)
-	}
-}
-
 func Run() {
-	var serverList string
-	var port int
-
-	parseAndLoadConfig(serverList, &port, setupService)
+	config := ParseAndLoadConfig(setupService)
 
 	server := http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
+		Addr:    fmt.Sprintf(":%d", config.Port),
 		Handler: http.HandlerFunc(lb),
 	}
 
 	// Start health check
 	go healthCheck()
 
-	fmt.Printf("Load Balancer started at %d\n", port)
+	fmt.Printf("Load Balancer started at %d\n", config.Port)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
