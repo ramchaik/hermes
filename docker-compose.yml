@@ -5,7 +5,13 @@ services:
     ports:
       - "9000:9000"
     command:
-      ["./lb", "--services", "http://srv1:80,http://srv2:80,http://srv3:80"]
+      [
+        "./lb",
+        "--port",
+        "9000",
+        "--services",
+        "http://srv1:80,http://srv2:80,http://srv3:80",
+      ]
   srv1:
     image: strm/helloworld-http
   srv2:
