@@ -57,7 +57,7 @@ func GetRetryFromContext(r *http.Request) int {
 	return 0
 }
 
-var serverPool ServicePool
+var serverPool *ServicePool
 
 func getProxyErrorHandler(proxy *httputil.ReverseProxy, serviceUrl *url.URL) func(w http.ResponseWriter, r *http.Request, err error) {
 	return func(w http.ResponseWriter, r *http.Request, err error) {
@@ -80,16 +80,9 @@ func getProxyErrorHandler(proxy *httputil.ReverseProxy, serviceUrl *url.URL) fun
 	}
 }
 
-func setupService(serviceUrl *url.URL) {
-	proxy := httputil.NewSingleHostReverseProxy(serviceUrl)
-	proxy.ErrorHandler = getProxyErrorHandler(proxy, serviceUrl)
-	service := NewService(serviceUrl, true, proxy)
-	serverPool.AddService(service)
-	log.Printf("Configured service: %s\n", serviceUrl)
-}
-
 func Run() {
-	config := ParseAndLoadConfig(setupService)
+	config := ParseAndLoadConfig()
+	serverPool = SetupServicePool(config)
 
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),

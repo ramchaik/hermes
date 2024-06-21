@@ -3,36 +3,60 @@ package loadbalancer
 import (
 	"log"
 	"net"
+	"net/http/httputil"
 	"net/url"
-	"sync/atomic"
 	"time"
 )
 
 type ServicePool struct {
 	services []*Service
-	current  uint64
+	strategy Strategy
 }
 
-func (sp *ServicePool) NextIndex() int {
-	if len(sp.services) == 0 {
-		log.Fatal("No services attached")
+func setupService(sp *ServicePool, serviceUrl *url.URL) error {
+	proxy := httputil.NewSingleHostReverseProxy(serviceUrl)
+	proxy.ErrorHandler = getProxyErrorHandler(proxy, serviceUrl)
+	service := NewService(serviceUrl, true, proxy)
+	sp.AddService(service)
+	log.Printf("Configured service: %s\n", serviceUrl)
+	return nil
+}
+
+func SetupServicePool(config *Config) *ServicePool {
+	servicePool := &ServicePool{
+		services: make([]*Service, 0, len(config.Services)),
+		strategy: nil,
 	}
-	return int(atomic.AddUint64(&sp.current, uint64(1)) % uint64(len(sp.services)))
+
+	for _, serviceConfig := range config.Services {
+		serviceUrl, err := url.Parse(serviceConfig.URL)
+		if err != nil {
+			log.Fatal(err)
+		}
+		setupService(servicePool, serviceUrl)
+	}
+
+	// Now set up the strategy
+	switch config.Strategy {
+	case RoundRobin:
+		servicePool.strategy = &RoundRobinStrategy{
+			services: servicePool.services,
+		}
+	default:
+		log.Fatalf("Invalid strategy: %s", config.Strategy)
+	}
+
+	log.Printf("Load distribution Strategy: [%s]", config.Strategy)
+
+	return servicePool
 }
 
 func (sp *ServicePool) GetNextPeer() *Service {
-	next := sp.NextIndex()
-	l := len(sp.services) + next
-	for i := next; i < l; i++ {
-		idx := i % len(sp.services)
-		if sp.services[idx].Alive {
-			if i != next {
-				atomic.StoreUint64(&sp.current, uint64(idx))
-			}
-			return sp.services[idx]
-		}
-	}
-	return nil
+	return sp.strategy.GetNextService()
+}
+
+func (sp *ServicePool) UpdateServiceStats(s *Service) {
+	sp.strategy.UpdateServiceStats(s)
 }
 
 func (sp *ServicePool) MarkBackendStatus(serviceUrl *url.URL, alive bool) {
