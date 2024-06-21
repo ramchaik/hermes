@@ -10,8 +10,9 @@ import (
 )
 
 type ServiceConfig struct {
-	URL  string `yaml:"url"`
-	Name string `yaml:"name"`
+	URL    string `yaml:"url"`
+	Name   string `yaml:"name"`
+	Weight int    `yaml:"weight"`
 }
 
 type StrategyConfig string
@@ -67,10 +68,18 @@ func ParseAndLoadConfig() *Config {
 		tokens := strings.Split(serverList, ",")
 		for _, t := range tokens {
 			cs := ServiceConfig{
-				URL:  t,
-				Name: t,
+				URL:    t,
+				Name:   t,
+				Weight: 1, // Default
 			}
 			config.Services = append(config.Services, cs)
+		}
+	}
+
+	// Set default weight for each service
+	for i := range config.Services {
+		if config.Services[i].Weight == 0 {
+			config.Services[i].Weight = 1
 		}
 	}
 

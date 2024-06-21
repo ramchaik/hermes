@@ -7,17 +7,21 @@ import (
 )
 
 type Service struct {
-	URL          *url.URL
-	Alive        bool
-	mux          sync.RWMutex
-	ReverseProxy *httputil.ReverseProxy
+	URL           *url.URL
+	Alive         bool
+	Weight        int
+	CurrentWeight int
+	mux           sync.RWMutex
+	ReverseProxy  *httputil.ReverseProxy
 }
 
-func NewService(url *url.URL, alive bool, proxy *httputil.ReverseProxy) *Service {
+func NewService(url *url.URL, alive bool, weight int, proxy *httputil.ReverseProxy) *Service {
 	return &Service{
-		URL:          url,
-		Alive:        alive,
-		ReverseProxy: proxy,
+		URL:           url,
+		Alive:         alive,
+		ReverseProxy:  proxy,
+		Weight:        weight,
+		CurrentWeight: 0,
 	}
 }
 

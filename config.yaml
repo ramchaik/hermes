@@ -1,8 +1,12 @@
-port: 9003
+port: 9000
+strategy: "weighted-round-robin"
 services:
   - name: srv1
-    url: http://srv1:80
+    url: http://localhost:9001
+    weight: 30
   - name: srv2
-    url: http://srv2:80
+    url: http://localhost:9002
+    weight: 1
   - name: srv3
-    url: http://srv3:80
+    url: http://localhost:9003
+    weight: 1

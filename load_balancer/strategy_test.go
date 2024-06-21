@@ -14,7 +14,7 @@ func TestRoundRobinLoadDistribution(t *testing.T) {
 	services := make([]*Service, 3)
 	for i := range services {
 		serviceURL, _ := url.Parse("http://service" + strconv.Itoa(i+1) + ".com")
-		services[i] = NewService(serviceURL, true, httputil.NewSingleHostReverseProxy(serviceURL))
+		services[i] = NewService(serviceURL, true, 1, httputil.NewSingleHostReverseProxy(serviceURL))
 	}
 
 	// Initialize the round-robin strategy with the services
