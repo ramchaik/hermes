@@ -39,9 +39,7 @@ func SetupServicePool(config *Config) *ServicePool {
 	// Now set up the strategy
 	switch config.Strategy {
 	case RoundRobin:
-		servicePool.strategy = &RoundRobinStrategy{
-			services: servicePool.services,
-		}
+		servicePool.strategy = NewRoundRobinStrategy(serverPool.services)
 	default:
 		log.Fatalf("Invalid strategy: %s", config.Strategy)
 	}

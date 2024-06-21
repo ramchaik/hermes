@@ -15,6 +15,12 @@ type RoundRobinStrategy struct {
 	current  uint64
 }
 
+func NewRoundRobinStrategy(services []*Service) *RoundRobinStrategy {
+	return &RoundRobinStrategy{
+		services: services,
+	}
+}
+
 func (s *RoundRobinStrategy) nextIndex() int {
 	if len(s.services) == 0 {
 		log.Fatal("No services attached")
