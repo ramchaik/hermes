@@ -7,6 +7,10 @@ Uses Round Robin for load distribution.
 ## Running the load balancer
 
 ```sh
+# if you have config.yaml setup 
+./hermes
+
+# OR with CLI args
 ./hermes \
     --port 9000 \
     --services http://localhost:9001,http://localhost:9002,http://localhost:9003 \
