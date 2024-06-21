@@ -9,7 +9,8 @@ Uses Round Robin for load distribution.
 ```sh
 ./hermes \
     --port 9000 \
-    --services http://localhost:9001,http://localhost:9002,http://localhost:9003 
+    --services http://localhost:9001,http://localhost:9002,http://localhost:9003 \
+    --strategy round-robin 
 
 ```
 
