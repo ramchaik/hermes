@@ -49,6 +49,12 @@ This command pulls the latest Hermes Docker image and runs it as a detached proc
 
 Dive into Hermes and experience the next level of load balancing!
 
+### Acknowledgement 
+
+This project stands on the shoulders of giants. A heartfelt thank you to the following resources and communities:
+
+- [Let's Create a Simple Load Balancer With Go](https://kasvith.me/posts/lets-create-a-simple-lb-go/) - This insightful blog post was the spark that ignited the creation of Hermes. It provided foundational knowledge and inspiration.
+
 ## TODO
 
 - [ ] Use a heap for sort out alive backends to reduce search surface
