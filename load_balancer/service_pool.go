@@ -48,7 +48,24 @@ func getProxyErrorHandler(sp *ServicePool, proxy *httputil.ReverseProxy, service
 		log.Printf("%s(%s) Attempting retry %d\n", r.RemoteAddr, r.URL.Path, attempts)
 		ctx := context.WithValue(r.Context(), Attempts, attempts+1)
 		sp.handler(w, r.WithContext(ctx))
+
+		// Decrement active connection count
+		service := sp.GetServiceByURL(serviceUrl)
+		if service != nil {
+			service.mux.Lock()
+			service.ActiveConn--
+			service.mux.Unlock()
+		}
 	}
+}
+
+func (sp *ServicePool) GetServiceByURL(serviceUrl *url.URL) *Service {
+	for _, service := range sp.services {
+		if service.URL.String() == serviceUrl.String() {
+			return service
+		}
+	}
+	return nil
 }
 
 func setupService(sp *ServicePool, sw int, serviceUrl *url.URL) *Service {
@@ -98,6 +115,9 @@ func NewServicePool(config *Config) *ServicePool {
 		sp.strategy = NewRoundRobinStrategy(sp.services)
 	case WeightedRoundRobin:
 		sp.strategy = NewWeightedRoundRobinStrategy(sp.services)
+	case LeastConnections:
+		sp.strategy = NewLeastConnectionsStrategy(sp.services)
+
 	default:
 		log.Fatalf("Invalid strategy: %s", config.Strategy)
 	}

@@ -11,6 +11,7 @@ type Service struct {
 	Alive         bool
 	Weight        int
 	CurrentWeight int
+	ActiveConn    int
 	mux           sync.RWMutex
 	ReverseProxy  *httputil.ReverseProxy
 }
@@ -22,6 +23,7 @@ func NewService(url *url.URL, alive bool, weight int, proxy *httputil.ReversePro
 		ReverseProxy:  proxy,
 		Weight:        weight,
 		CurrentWeight: 0,
+		ActiveConn:    0,
 	}
 }
 

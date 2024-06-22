@@ -1,5 +1,5 @@
 port: 9000
-strategy: "weighted-round-robin"
+strategy: "least-connections"
 services:
   - name: srv1
     url: http://localhost:9001
