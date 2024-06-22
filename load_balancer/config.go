@@ -24,9 +24,10 @@ const (
 )
 
 type Config struct {
-	Port     int             `yaml:"port"`
-	Services []ServiceConfig `yaml:"services"`
-	Strategy StrategyConfig  `yaml:"strategy"`
+	Port             int             `yaml:"port"`
+	Services         []ServiceConfig `yaml:"services"`
+	Strategy         StrategyConfig  `yaml:"strategy"`
+	HealthCheckInSec int             `yaml:"healthCheckInSec"`
 }
 
 func loadFileConfig(filename string) *Config {
@@ -53,12 +54,14 @@ func ParseAndLoadConfig() *Config {
 	var configFile string
 	var serverList string
 	var strategy string
+	var healthCheckInSec int
 	var port int
 
-	flag.StringVar(&configFile, "file", "", "YAML Config file for load balance")
+	flag.StringVar(&configFile, "file", "config.yaml", "YAML Config file for load balance")
 	flag.StringVar(&serverList, "services", "", "Load balanced services, use comma separated list")
-	flag.IntVar(&port, "port", 9000, "Port to serve")
+	flag.IntVar(&port, "port", 80, "Port to serve")
 	flag.StringVar(&strategy, "strategy", string(RoundRobin), "Strategy for load distribution")
+	flag.IntVar(&healthCheckInSec, "healthCheckInSec", 20, "Do a health check for each service every X seconds")
 	flag.Parse()
 
 	config := loadFileConfig(configFile)

@@ -1,4 +1,5 @@
-port: 9000
+port: 80
+healthCheckInSec: 20 # Health check every 20 seconds
 strategy: "least-connections"
 services:
   - name: srv1

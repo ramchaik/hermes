@@ -14,9 +14,9 @@ const (
 	Retry
 )
 
-// Run a health check every 20secs
+// Run a health check every X secs
 func healthCheck(sp *ServicePool) {
-	t := time.NewTicker(20 * time.Second)
+	t := time.NewTicker(time.Duration(sp.HealthCheckInSec) * time.Second)
 	for range t.C {
 		log.Printf("Starting health check...")
 		sp.HealthCheck()
@@ -30,7 +30,7 @@ func Run() {
 
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
-		Handler: http.HandlerFunc(sp.handler),
+		Handler: http.HandlerFunc(sp.Handler),
 	}
 
 	// Start health check

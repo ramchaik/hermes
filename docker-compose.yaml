@@ -3,12 +3,12 @@ services:
     build: .
     container_name: load-balancer
     ports:
-      - "9000:9000"
+      - "80:80"
     command:
       [
         "./lb",
         "--port",
-        "9000",
+        "80",
         "--services",
         "http://srv1:80,http://srv2:80,http://srv3:80",
         "--file",

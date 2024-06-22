@@ -11,9 +11,10 @@ import (
 )
 
 type ServicePool struct {
-	services []*Service
-	strategy Strategy
-	handler  func(w http.ResponseWriter, r *http.Request)
+	Services         []*Service
+	Strategy         Strategy
+	Handler          func(w http.ResponseWriter, r *http.Request)
+	HealthCheckInSec int
 }
 
 func GetAttemptsFromContext(r *http.Request) int {
@@ -47,7 +48,7 @@ func getProxyErrorHandler(sp *ServicePool, proxy *httputil.ReverseProxy, service
 		attempts := GetAttemptsFromContext(r)
 		log.Printf("%s(%s) Attempting retry %d\n", r.RemoteAddr, r.URL.Path, attempts)
 		ctx := context.WithValue(r.Context(), Attempts, attempts+1)
-		sp.handler(w, r.WithContext(ctx))
+		sp.Handler(w, r.WithContext(ctx))
 
 		// Decrement active connection count
 		service := sp.GetServiceByURL(serviceUrl)
@@ -60,7 +61,7 @@ func getProxyErrorHandler(sp *ServicePool, proxy *httputil.ReverseProxy, service
 }
 
 func (sp *ServicePool) GetServiceByURL(serviceUrl *url.URL) *Service {
-	for _, service := range sp.services {
+	for _, service := range sp.Services {
 		if service.URL.String() == serviceUrl.String() {
 			return service
 		}
@@ -78,7 +79,7 @@ func setupService(sp *ServicePool, sw int, serviceUrl *url.URL) *Service {
 }
 
 func (sp *ServicePool) initHandler() {
-	sp.handler = func(w http.ResponseWriter, r *http.Request) {
+	sp.Handler = func(w http.ResponseWriter, r *http.Request) {
 		attempts := GetAttemptsFromContext(r)
 		if attempts > 3 {
 			log.Printf("%s(%s) Max attempts reached, terminating\n", r.RemoteAddr, r.URL.Path)
@@ -97,8 +98,8 @@ func (sp *ServicePool) initHandler() {
 
 func NewServicePool(config *Config) *ServicePool {
 	sp := &ServicePool{
-		services: make([]*Service, 0, len(config.Services)),
-		strategy: nil,
+		Services: make([]*Service, 0, len(config.Services)),
+		Strategy: nil,
 	}
 
 	for _, serviceConfig := range config.Services {
@@ -112,17 +113,20 @@ func NewServicePool(config *Config) *ServicePool {
 	// Now set up the strategy
 	switch config.Strategy {
 	case RoundRobin:
-		sp.strategy = NewRoundRobinStrategy(sp.services)
+		sp.Strategy = NewRoundRobinStrategy(sp.Services)
 	case WeightedRoundRobin:
-		sp.strategy = NewWeightedRoundRobinStrategy(sp.services)
+		sp.Strategy = NewWeightedRoundRobinStrategy(sp.Services)
 	case LeastConnections:
-		sp.strategy = NewLeastConnectionsStrategy(sp.services)
+		sp.Strategy = NewLeastConnectionsStrategy(sp.Services)
 
 	default:
 		log.Fatalf("Invalid strategy: %s", config.Strategy)
 	}
 
 	log.Printf("Load distribution Strategy: [%s]", config.Strategy)
+
+	// Set Health check in seconds for service pool
+	sp.HealthCheckInSec = config.HealthCheckInSec
 
 	// Create the LB Handler
 	sp.initHandler()
@@ -131,15 +135,15 @@ func NewServicePool(config *Config) *ServicePool {
 }
 
 func (sp *ServicePool) GetNextPeer() *Service {
-	return sp.strategy.GetNextService()
+	return sp.Strategy.GetNextService()
 }
 
 func (sp *ServicePool) UpdateServiceStats(s *Service) {
-	sp.strategy.UpdateServiceStats(s)
+	sp.Strategy.UpdateServiceStats(s)
 }
 
 func (sp *ServicePool) MarkBackendStatus(serviceUrl *url.URL, alive bool) {
-	for _, s := range sp.services {
+	for _, s := range sp.Services {
 		if s.URL.String() == serviceUrl.String() {
 			s.SetAlive(alive)
 			break
@@ -148,7 +152,7 @@ func (sp *ServicePool) MarkBackendStatus(serviceUrl *url.URL, alive bool) {
 }
 
 func (sp *ServicePool) HealthCheck() {
-	for _, s := range sp.services {
+	for _, s := range sp.Services {
 		status := "up"
 
 		alive := isBackendAlive(s.URL)
@@ -162,7 +166,7 @@ func (sp *ServicePool) HealthCheck() {
 }
 
 func (sp *ServicePool) AddService(service *Service) {
-	sp.services = append(sp.services, service)
+	sp.Services = append(sp.Services, service)
 }
 
 // isBackendAlive checks whether a service is Alive by establishing a TCP connection

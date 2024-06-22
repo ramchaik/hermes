@@ -27,7 +27,7 @@ Ensure you have a `config.yaml` set up with your desired settings.
 ### Using Command-Line Arguments
 
 ```sh
-./hermes --strategy="round-robin"
+./hermes --help
 ```
 
 ### :whale: Running with Docker
