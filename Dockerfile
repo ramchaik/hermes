@@ -7,5 +7,5 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /app/lb .
-EXPOSE 9000
+EXPOSE 80
 CMD ["./lb"]

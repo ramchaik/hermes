@@ -9,7 +9,6 @@ import (
 
 // TestWeightedRoundRobinDistribution tests the distribution of requests among services based on their weights
 func TestWeightedRoundRobinDistribution(t *testing.T) {
-	// Assuming each Service has a Count field or you're tracking counts externally
 	// Initialize the count map
 	serviceCounts := make(map[*Service]int)
 
