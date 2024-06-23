@@ -30,16 +30,15 @@ Ensure you have a `config.yaml` set up with your desired settings.
 ./hermes --help
 ```
 
-### :whale: Running with Docker
+### :whale: Running with Docker Compose
 
 ```sh
-docker pull hermes/loadbalancer:latest
-docker run -d -p 80:80 hermes/loadbalancer:latest
+docker compose up
 ```
 
 Hermes is also available as a Docker image, making it even easier to deploy in any environment.
 
-This command pulls the latest Hermes Docker image and runs it as a detached process, mapping the container's port 80 to the host's port 80.
+Please update `docker-compose.yaml` to run the docker container with different configuration for Hermes.
 
 ### :sparkles: Why Hermes?
 
