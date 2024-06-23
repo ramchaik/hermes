@@ -1,6 +1,6 @@
 package main
 
-import lb "hermes/load_balancer"
+import lb "github.com/ramchaik/hermes/load_balancer"
 
 func main() {
 	lb.Run()

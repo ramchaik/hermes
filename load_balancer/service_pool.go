@@ -42,7 +42,7 @@ func getProxyErrorHandler(sp *ServicePool, proxy *httputil.ReverseProxy, service
 			return
 		}
 
-		// After 3 retires, mark service as down
+		// After 3 retires, mark service as down (Active)
 		sp.MarkBackendStatus(serviceUrl, false)
 
 		attempts := GetAttemptsFromContext(r)

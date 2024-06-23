@@ -33,7 +33,7 @@ func Run() {
 		Handler: http.HandlerFunc(sp.Handler),
 	}
 
-	// Start health check
+	// Start health check (passive)
 	go healthCheck(sp)
 
 	fmt.Printf("Load Balancer started at %d\n", config.Port)
