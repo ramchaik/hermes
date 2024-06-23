@@ -4,16 +4,7 @@ services:
     container_name: load-balancer
     ports:
       - "80:80"
-    command:
-      [
-        "./lb",
-        "--port",
-        "80",
-        "--services",
-        "http://srv1:80,http://srv2:80,http://srv3:80",
-        "--file",
-        "config.yaml",
-      ]
+    command: ["./lb", "-file", "config.yaml"]
   srv1:
     image: strm/helloworld-http
   srv2:
