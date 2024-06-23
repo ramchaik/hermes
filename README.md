@@ -36,9 +36,9 @@ Ensure you have a `config.yaml` set up with your desired settings.
 docker compose up
 ```
 
-Hermes is also available as a Docker image, making it even easier to deploy in any environment.
+Hermes is equipped with Docker configurations for seamless deployment across any setup.
 
-Please update `docker-compose.yaml` to run the docker container with different configuration for Hermes.
+To customize Hermes' deployment, modify the `docker-compose.yaml` file with your preferred settings.
 
 ### :sparkles: Why Hermes?
 
